@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -20,14 +20,60 @@ model User {
 
   firstName String?
   lastName  String?
+
+  orders Order[]
+
+  @@map("users")
 }
 
-model Bookmark {
-  id        Int      @id @default(autoincrement())
+model MealCategory {
+  id String @id @default(uuid())
+  name String
+
+  meals Meal[]
+}
+
+model Meal {
+  id        String @id     @default(uuid())
+  name      String
+  description String?
+  price     Float 
+  image     String?
+  available Boolean?
+  mealCategoryId String
+  mealCategory MealCategory @relation(fields: [mealCategoryId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title       String
-  description String?
-  link        String
+  mealHasOrder OrderHasMeal[]
+
+  @@map("meals")
+}
+
+model Order {
+  id String @id @default(uuid())
+  price Float
+  userId String
+  situationId String
+  situation Situation @relation(fields: [situationId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  orderHasMeal OrderHasMeal[]
+}
+
+model OrderHasMeal {
+  id String @id @default(uuid())
+  orderId String
+  mealId String
+  order Order @relation(fields: [orderId], references: [id])
+  meal Meal @relation(fields: [mealId], references: [id])
+  quantity Int
+}
+
+model Situation {
+  id String @id @default(uuid())
+  description String
+
+  orders Order[]
 }

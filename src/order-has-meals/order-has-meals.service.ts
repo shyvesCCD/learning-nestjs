@@ -9,8 +9,24 @@ export class OrderHasMealsService {
   async create(createOrderHasMealDto: CreateOrderHasMealDto) {
     const orderHasMeals = await this.prisma.orderHasMeal.create({
       data: createOrderHasMealDto,
+      include: {
+        meal: true,
+        order: true,
+      },
     });
-    return orderHasMeals;
+
+    const order = await this.prisma.order.update({
+      where: {
+        id: createOrderHasMealDto.orderId,
+      },
+      data: {
+        price:
+          orderHasMeals.order.price +
+          orderHasMeals.meal.price * orderHasMeals.quantity,
+      },
+    });
+
+    return { ...orderHasMeals, order };
   }
 
   findAll() {

@@ -12,14 +12,13 @@ datasource db {
 
 model User {
   id        String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  name String
 
   email String @unique
   password  String
 
-  firstName String?
-  lastName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   orders Order[]
 
@@ -40,7 +39,7 @@ model Meal {
   price     Float 
   image     String?
   available Boolean?
-  mealCategoryId String
+  mealCategoryId String 
   mealCategory MealCategory @relation(fields: [mealCategoryId], references: [id])
 
   createdAt DateTime @default(now())

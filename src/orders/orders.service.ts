@@ -9,6 +9,9 @@ export class OrdersService {
   async create(createOrderDto: CreateOrderDto) {
     const order = await this.prisma.order.create({
       data: createOrderDto,
+      include: {
+        situation: true,
+      },
     });
     return order;
   }
@@ -17,8 +20,20 @@ export class OrdersService {
     return `This action returns all orders`;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} order`;
+  async findOne(id: string) {
+    const order = await this.prisma.order.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        situation: {
+          select: {
+            description: true,
+          },
+        },
+      },
+    });
+    return order;
   }
 
   update(id: string, updateOrderDto: UpdateOrderDto) {

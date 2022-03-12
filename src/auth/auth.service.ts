@@ -1,12 +1,22 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private config: ConfigService,
+  ) {}
   async signup(dto: AuthDto) {
     // hashing the password
     const hash = await argon.hash(dto.password);
@@ -50,7 +60,31 @@ export class AuthService {
     // throw a exeption if password incorrect
     if (!passwordMatches) throw new ForbiddenException('Credentials incorrect');
 
-    delete user.password;
-    return user;
+    return { token: await this.signToken(user.id) };
+  }
+
+  private signToken(userId: string): Promise<string> {
+    const payload = {
+      sub: userId,
+    };
+    const token = this.jwt.signAsync(payload, {
+      expiresIn: '15m',
+      secret: this.config.get('JWT_SECRET'),
+    });
+    return token;
+  }
+
+  verifyToken(token: string) {
+    if (!token) {
+      throw new ForbiddenException('No token provided');
+    }
+
+    return this.jwt
+      .verifyAsync(token, {
+        secret: this.config.get('JWT_SECRET'),
+      })
+      .catch(() => {
+        throw new UnauthorizedException('Invalid token');
+      });
   }
 }

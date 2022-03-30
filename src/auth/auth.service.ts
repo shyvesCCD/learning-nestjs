@@ -1,14 +1,10 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +32,7 @@ export class AuthService {
           orders: true,
         },
       });
-      return user;
+      return this.signToken(user.id, user.email);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -60,31 +56,28 @@ export class AuthService {
     // throw a exeption if password incorrect
     if (!passwordMatches) throw new ForbiddenException('Credentials incorrect');
 
-    return { token: await this.signToken(user.id) };
+    return this.signToken(user.id, user.email);
   }
 
-  private signToken(userId: string): Promise<string> {
+  // Função responsavel por criar o token jwt, assim podemos retornar pro usuário o seu token
+  async signToken(
+    userId: string,
+    email: string,
+  ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
+      email,
     };
-    const token = this.jwt.signAsync(payload, {
+
+    const secret = this.config.get('JWT_SECRET');
+
+    const token = await this.jwt.signAsync(payload, {
       expiresIn: '15m',
-      secret: this.config.get('JWT_SECRET'),
+      secret: secret,
     });
-    return token;
-  }
-
-  verifyToken(token: string) {
-    if (!token) {
-      throw new ForbiddenException('No token provided');
-    }
-
-    return this.jwt
-      .verifyAsync(token, {
-        secret: this.config.get('JWT_SECRET'),
-      })
-      .catch(() => {
-        throw new UnauthorizedException('Invalid token');
-      });
+    // Fazemos dessa maneira para retornar um json.
+    return {
+      access_token: token,
+    };
   }
 }

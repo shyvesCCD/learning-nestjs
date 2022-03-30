@@ -15,6 +15,7 @@ export class AuthDto {
   @IsNotEmpty()
   readonly email: string;
 
+  @MinLength(6)
   @IsNotEmpty()
   @MinLength(6)
   readonly password: string;

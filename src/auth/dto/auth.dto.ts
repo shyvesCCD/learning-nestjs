@@ -17,5 +17,6 @@ export class AuthDto {
 
   @MinLength(6)
   @IsNotEmpty()
+  @MinLength(6)
   readonly password: string;
 }

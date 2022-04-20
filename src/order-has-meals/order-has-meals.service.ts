@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderHasMealDto } from './dto/create-order-has-meal.dto';
 import { UpdateOrderHasMealDto } from './dto/update-order-has-meal.dto';
 

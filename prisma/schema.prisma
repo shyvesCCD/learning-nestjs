@@ -11,7 +11,7 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
+  id String @id @default(uuid())
   name String
 
   email String @unique
@@ -33,14 +33,14 @@ model MealCategory {
 }
 
 model Meal {
-  id        String @id     @default(uuid())
-  name      String
+  id        String @id @default(uuid())
+  name String 
   description String?
   price     Float 
   image     String?
   available Boolean?
   mealCategoryId String 
-  mealCategory MealCategory @relation(fields: [mealCategoryId], references: [id])
+  mealCategory MealCategory @relation(fields: [mealCategoryId], references: [id]) 
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

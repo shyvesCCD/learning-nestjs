@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { CreateMealDto } from './dto/create-meal.dto';
-import { UpdateMealDto } from './dto/update-meal.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -20,7 +19,7 @@ export class MealsService {
     return meal;
   }
 
-  findAll() {
+  findAll(): string {
     return `This action returns all meals`;
   }
 
@@ -28,7 +27,7 @@ export class MealsService {
     return `This action returns a #${id} meal`;
   }
 
-  update(id: string, updateMealDto: UpdateMealDto) {
+  update(id: string) {
     return `This action updates a #${id} meal`;
   }
 
